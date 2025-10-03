@@ -1,0 +1,56 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id        Int      @id @default(autoincrement())
+  nombre    String
+  email     String   @unique
+  password  String
+  rol       String   // "cliente", "admin", "empleado"
+  reservas  Reserva[]
+}
+
+model Habitacion {
+  id          Int       @id @default(autoincrement())
+  numero      Int       @unique
+  tipo        String    // "single", "doble", "suite"
+  precio      Float
+  estado      String    // "disponible", "ocupada", "mantenimiento"
+  reservas    Reserva[]
+}
+
+model Reserva {
+  id           Int       @id @default(autoincrement())
+  usuarioId    Int
+  habitacionId Int
+  fechaInicio  DateTime
+  fechaFin     DateTime
+  estado       String    // "pendiente", "confirmada", "cancelada"
+
+  usuario      Usuario   @relation(fields: [usuarioId], references: [id])
+  habitacion   Habitacion @relation(fields: [habitacionId], references: [id])
+  pagos        Pago[]
+}
+
+model Pago {
+  id         Int       @id @default(autoincrement())
+  reservaId  Int
+  monto      Float
+  metodo     String    // "tarjeta", "efectivo", "transferencia"
+  estado     String    // "pendiente", "pagado"
+
+  reserva    Reserva   @relation(fields: [reservaId], references: [id])
+}
