@@ -122,128 +122,54 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
 
 exports.Prisma.UsuarioScalarFieldEnum = {
   id: 'id',
-  username: 'username',
-  contraseña: 'contraseña',
-  rol: 'rol',
-  email: 'email',
-  creadoEn: 'creadoEn',
-  actualizadoEn: 'actualizadoEn'
-};
-
-exports.Prisma.ProvinciaScalarFieldEnum = {
-  id: 'id',
-  nombre: 'nombre'
-};
-
-exports.Prisma.LocalidadScalarFieldEnum = {
-  id: 'id',
   nombre: 'nombre',
-  provinciaId: 'provinciaId'
+  apellido: 'apellido',
+  email: 'email',
+  password: 'password',
+  rol: 'rol',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
-exports.Prisma.ObraSocialScalarFieldEnum = {
+exports.Prisma.HabitacionScalarFieldEnum = {
   id: 'id',
-  nombre: 'nombre'
+  numero: 'numero',
+  piso: 'piso',
+  tipo: 'tipo',
+  descripcion: 'descripcion',
+  capacidad: 'capacidad',
+  precioPorNoche: 'precioPorNoche',
+  estado: 'estado'
 };
 
-exports.Prisma.PrestacionScalarFieldEnum = {
+exports.Prisma.ReservaScalarFieldEnum = {
+  id: 'id',
+  usuarioId: 'usuarioId',
+  habitacionId: 'habitacionId',
+  fechaInicio: 'fechaInicio',
+  fechaFin: 'fechaFin',
+  numeroHuespedes: 'numeroHuespedes',
+  estado: 'estado',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.PagoScalarFieldEnum = {
+  id: 'id',
+  reservaId: 'reservaId',
+  monto: 'monto',
+  metodo: 'metodo',
+  estado: 'estado'
+};
+
+exports.Prisma.ServicioScalarFieldEnum = {
   id: 'id',
   nombre: 'nombre',
   descripcion: 'descripcion'
 };
 
-exports.Prisma.PacienteScalarFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  creadoPorId: 'creadoPorId',
-  numeroInterno: 'numeroInterno',
-  nombre: 'nombre',
-  apellido: 'apellido',
-  dni: 'dni',
-  fechaNacimiento: 'fechaNacimiento',
-  genero: 'genero',
-  estadoCivil: 'estadoCivil',
-  pais: 'pais',
-  provinciaId: 'provinciaId',
-  localidadId: 'localidadId',
-  barrio: 'barrio',
-  calle: 'calle',
-  numero: 'numero',
-  celular: 'celular',
-  email: 'email',
-  obraSocialId: 'obraSocialId',
-  numeroSocio: 'numeroSocio',
-  plan: 'plan',
-  estado: 'estado',
-  creadoEn: 'creadoEn',
-  actualizadoEn: 'actualizadoEn'
-};
-
-exports.Prisma.ProfesionalScalarFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  creadoPorId: 'creadoPorId',
-  numeroInterno: 'numeroInterno',
-  nombre: 'nombre',
-  apellido: 'apellido',
-  dni: 'dni',
-  fechaNacimiento: 'fechaNacimiento',
-  genero: 'genero',
-  estadoCivil: 'estadoCivil',
-  pais: 'pais',
-  provinciaId: 'provinciaId',
-  localidadId: 'localidadId',
-  barrio: 'barrio',
-  calle: 'calle',
-  numero: 'numero',
-  celular: 'celular',
-  email: 'email',
-  titulo: 'titulo',
-  matricula: 'matricula',
-  especialidad: 'especialidad',
-  universidad: 'universidad',
-  fechaGraduacion: 'fechaGraduacion',
-  horarioTrabajo: 'horarioTrabajo',
-  creadoEn: 'creadoEn',
-  actualizadoEn: 'actualizadoEn'
-};
-
-exports.Prisma.PrestacionXProfesionalScalarFieldEnum = {
-  id: 'id',
-  profesionalId: 'profesionalId',
-  prestacionId: 'prestacionId'
-};
-
-exports.Prisma.ObraSocialXProfesionalScalarFieldEnum = {
-  id: 'id',
-  profesionalId: 'profesionalId',
-  obraSocialId: 'obraSocialId'
-};
-
-exports.Prisma.TurnoScalarFieldEnum = {
-  id: 'id',
-  pacienteId: 'pacienteId',
-  profesionalId: 'profesionalId',
-  fecha: 'fecha',
-  hora: 'hora',
-  estado: 'estado',
-  creadoEn: 'creadoEn'
-};
-
-exports.Prisma.DetalleTurnoScalarFieldEnum = {
-  id: 'id',
-  turnoId: 'turnoId',
-  descripcion: 'descripcion',
-  observacion: 'observacion',
-  creadoEn: 'creadoEn'
-};
-
-exports.Prisma.CentroMedicoScalarFieldEnum = {
-  id: 'id',
-  nombre: 'nombre',
-  direccion: 'direccion',
-  telefono: 'telefono',
-  email: 'email'
+exports.Prisma.ServicioEnHabitacionScalarFieldEnum = {
+  habitacionId: 'habitacionId',
+  servicioId: 'servicioId'
 };
 
 exports.Prisma.SortOrder = {
@@ -260,53 +186,19 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
-exports.Rol = exports.$Enums.Rol = {
-  RECEPCIONISTA: 'RECEPCIONISTA',
-  MEDICO: 'MEDICO',
-  GERENTE: 'GERENTE'
-};
-
-exports.Genero = exports.$Enums.Genero = {
-  FEMENINO: 'FEMENINO',
-  MASCULINO: 'MASCULINO',
-  OTRO: 'OTRO'
-};
-
-exports.EstadoCivil = exports.$Enums.EstadoCivil = {
-  SOLTERO: 'SOLTERO',
-  CASADO: 'CASADO',
-  DIVORCIADO: 'DIVORCIADO',
-  VIUDO: 'VIUDO',
-  UNION_LIBRE: 'UNION_LIBRE'
-};
-
-exports.EstadoPaciente = exports.$Enums.EstadoPaciente = {
-  ACTIVO: 'ACTIVO',
-  INACTIVO: 'INACTIVO',
-  SUSPENDIDO: 'SUSPENDIDO',
-  FALLECIDO: 'FALLECIDO'
-};
-
-exports.EstadoTurno = exports.$Enums.EstadoTurno = {
-  PENDIENTE: 'PENDIENTE',
-  CONFIRMADO: 'CONFIRMADO',
-  CANCELADO: 'CANCELADO',
-  COMPLETADO: 'COMPLETADO'
+exports.RolUsuario = exports.$Enums.RolUsuario = {
+  USUARIO: 'USUARIO',
+  OPERADOR: 'OPERADOR',
+  ADMINISTRADOR: 'ADMINISTRADOR'
 };
 
 exports.Prisma.ModelName = {
   Usuario: 'Usuario',
-  Provincia: 'Provincia',
-  Localidad: 'Localidad',
-  ObraSocial: 'ObraSocial',
-  Prestacion: 'Prestacion',
-  Paciente: 'Paciente',
-  Profesional: 'Profesional',
-  PrestacionXProfesional: 'PrestacionXProfesional',
-  ObraSocialXProfesional: 'ObraSocialXProfesional',
-  Turno: 'Turno',
-  DetalleTurno: 'DetalleTurno',
-  CentroMedico: 'CentroMedico'
+  Habitacion: 'Habitacion',
+  Reserva: 'Reserva',
+  Pago: 'Pago',
+  Servicio: 'Servicio',
+  ServicioEnHabitacion: 'ServicioEnHabitacion'
 };
 
 /**
