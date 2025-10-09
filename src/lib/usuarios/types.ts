@@ -1,34 +1,44 @@
-import { z } from "zod";
+// En: /lib/usuarios/types.ts
 
-// Roles de usuario
-export const Roles = ["RECEPCIONISTA","MEDICO","GERENTE"] as const;
-export type Role = typeof Roles[number];
-export type JwtUser = { sub: string; email: string; role: Role; username: string };
+import { z } from 'zod'
+// CAMBIO: Importamos el Enum de roles directamente desde el cliente de Prisma
+import { RolUsuario } from '@/generated/prisma/client'
 
-// --- Login por usuario ---
+// CAMBIO: El schema ahora espera 'email' en lugar de 'username'.
 export const LoginBodySchema = z.object({
-  username: z.string().min(1).max(11).regex(/^\S+$/, "sin espacios"),
-  password: z.string().min(1).max(11).regex(/^\S+$/, "sin espacios"),
-});
-export type LoginBody = z.infer<typeof LoginBodySchema>;
+  email: z.string().email('Debe ser un correo válido'),
+  password: z.string().min(1, 'La contraseña es requerida'),
+})
 
-export const UserPublicSchema = z.object({
-  id: z.string(),
-  username: z.string(),
-  email: z.string().email(),
-  role: z.enum(Roles),
-});
-
+// Schema para una respuesta de login exitosa
 export const LoginSuccessSchema = z.object({
-  message: z.string().optional(),
-  role: z.enum(Roles),
-  user: UserPublicSchema,
+  message: z.string(),
+  // CAMBIO: Usamos nuestro Enum de Prisma para validar el rol
+  role: z.nativeEnum(RolUsuario),
+  user: z.object({
+    id: z.string(),
+    // CAMBIO: Usamos 'nombre' y 'email'
+    nombre: z.string(),
+    email: z.string(),
+    role: z.nativeEnum(RolUsuario),
+  }),
   token: z.string(),
-});
-export type LoginSuccess = z.infer<typeof LoginSuccessSchema>;
+})
 
-export const ErrorSchema = z.object({ error: z.string() });
-export type ErrorResponse = z.infer<typeof ErrorSchema>;
+// Schema para una respuesta de error
+export const LoginErrorSchema = z.object({
+  error: z.string(),
+})
 
-export const LoginResponseSchema = z.union([LoginSuccessSchema, ErrorSchema]);
-export type LoginResponse = z.infer<typeof LoginResponseSchema>;
+// Unión de los dos tipos de respuesta para el frontend
+export const LoginResponseSchema = z.union([LoginSuccessSchema, LoginErrorSchema])
+
+// Tipos inferidos de los schemas para usar en el código
+export type LoginBody = z.infer<typeof LoginBodySchema>
+export type LoginSuccess = z.infer<typeof LoginSuccessSchema>
+export type LoginError = z.infer<typeof LoginErrorSchema>
+export type LoginResponse = z.infer<typeof LoginResponseSchema>
+
+// Exportamos el Enum para poder usarlo en otras partes si es necesario
+export const Role = RolUsuario
+export type Role = z.infer<typeof z.nativeEnum<typeof Role>>

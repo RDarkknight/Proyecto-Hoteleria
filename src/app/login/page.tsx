@@ -34,13 +34,12 @@ export default function LoginPage() {
 
   // validaciones HU: no espacios y máx 11
   const usernameOk =
-    form.username.length > 0 &&
-    form.username.length <= 11 &&
+    form.email.length > 0 && 
+    form.email.includes('@');
     !/\s/.test(form.username)
 
   const passwordOk =
     form.password.length > 0 &&
-    form.password.length <= 11 &&
     !/\s/.test(form.password)
 
   const canSubmit = usernameOk && passwordOk && !loading
@@ -69,13 +68,19 @@ export default function LoginPage() {
       }
 
       // Bienvenida 5s y redirección
-      setBanner(`Bienvenido, ${data.role}`)
+      setBanner(`Bienvenido, ${data.user.nombre}`);
       setTimeout(() => {
-        if (nextPath) return router.replace(nextPath)
-        if (data.role === 'RECEPCIONISTA') router.replace('/dashboard')
-        else if (data.role === 'MEDICO')   router.replace('/dashboard')
-        else                                router.replace('/admin')
-      }, 5000)
+        if (nextPath) return router.replace(nextPath);
+        // Redirección basada en los roles de nuestro Enum
+        if (data.role === 'ADMINISTRADOR') {
+          router.replace('/admin/dashboard');
+        } else if (data.role === 'OPERADOR') {
+          router.replace('/operator/dashboard');
+        } else { // El rol por defecto es 'USUARIO'
+          router.replace('/dashboard'); 
+        }
+
+      }, 3000);
     } catch {
       setError('No se pudo conectar con el servidor')
     } finally {

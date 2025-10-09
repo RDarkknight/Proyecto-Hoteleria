@@ -1,34 +1,34 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyPassword, signJwt } from "@/lib/usuarios/auth";
+import { RolUsuario } from "@/generated/prisma/client";
 import { LoginBodySchema, LoginSuccessSchema, type Role } from "@/lib/usuarios/types";
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { username, password } = LoginBodySchema.parse(body);
+    // CAMBIO: El schema de validación ahora debe esperar 'email' en lugar de 'username'
+    const { email, password } = LoginBodySchema.parse(body);
 
-    type UsuarioWithPassword = {
-      id: number | string;
-      username: string;
-      email: string;
-      rol: Role;
-      passwordHash?: string;
-      contraseña?: string;
-    };
+    // CAMBIO: Buscamos al usuario por 'email' porque ahora es el campo único
+    const user = await prisma.usuario.findUnique({ where: { email } });
 
-    const user = await prisma.usuario.findUnique({ where: { username } }) as UsuarioWithPassword | null;
-    if (!user) return NextResponse.json({ error: "Credenciales inválidas" }, { status: 401 });
+    if (!user) {
+      return NextResponse.json({ error: "Credenciales inválidas" }, { status: 401 });
+    }
 
-    
-    const ok = await verifyPassword(password, (user as any)['contraseña'])
-    if (!ok) return NextResponse.json({ error: "Credenciales inválidas" }, { status: 401 });
+    // CAMBIO: Verificamos contra el campo 'password' de nuestro nuevo schema
+    const ok = await verifyPassword(password, user.password);
+    if (!ok) {
+      return NextResponse.json({ error: "Credenciales inválidas" }, { status: 401 });
+    }
 
+    // El token ahora contendrá el rol del nuevo Enum
     const token = signJwt({
       sub: String(user.id),
       email: user.email,
-      role: user.rol as Role,
-      username: user.username,
+      role: user.rol, // user.rol ya es del tipo RolUsuario
+      nombre: user.nombre,
     });
 
     const res = NextResponse.json(
@@ -37,9 +37,9 @@ export async function POST(req: NextRequest) {
         role: user.rol,
         user: {
           id: String(user.id),
-          username: user.username,
+          nombre: user.nombre,
           email: user.email,
-          role: user.rol as Role,
+          role: user.rol,
         },
         token,
       })
@@ -52,12 +52,12 @@ export async function POST(req: NextRequest) {
       sameSite: "strict",
       secure: process.env.NODE_ENV === "production",
       path: "/",
-      maxAge: 60 * 15, // 15 min por HU-GAS-02 (inactividad)
+      maxAge: 60 * 60 * 24, // 24 horas para comodidad en el desarrollo
     });
 
     return res;
   } catch (err) {
     console.error("[LOGIN]", err);
-    return NextResponse.json({ error: "Error en login" }, { status: 400 });
+    return NextResponse.json({ error: "Error en el servidor" }, { status: 500 });
   }
 }
