@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
-import Button from '@/components/ui/button'
+import { Button} from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
@@ -12,7 +12,7 @@ export default function LoginPage() {
   const nextPath = search.get('next')
 
   // usamos username + password (≤ 11, sin espacios)
-  const [form, setForm] = useState<{ username: string; password: string }>({ username: '', password: '' })
+  const [form, setForm] = useState<{ email: string; password: string }>({ email: '', password: '' })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [banner, setBanner] = useState<string | null>(null) // mensajes (bienvenida / flash)
@@ -33,16 +33,16 @@ export default function LoginPage() {
   }, [])
 
   // validaciones HU: no espacios y máx 11
-  const usernameOk =
+  const mailOk =
     form.email.length > 0 && 
-    form.email.includes('@');
-    !/\s/.test(form.username)
+    form.email.includes('@') &&
+    !/\s/.test(form.email)
 
   const passwordOk =
     form.password.length > 0 &&
     !/\s/.test(form.password)
 
-  const canSubmit = usernameOk && passwordOk && !loading
+  const canSubmit = mailOk && passwordOk && !loading
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -77,7 +77,7 @@ export default function LoginPage() {
         } else if (data.role === 'OPERADOR') {
           router.replace('/operator/dashboard');
         } else { // El rol por defecto es 'USUARIO'
-          router.replace('/dashboard'); 
+          router.replace('/home'); 
         }
 
       }, 3000);
@@ -109,8 +109,8 @@ export default function LoginPage() {
             </div>
             <div className="relative w-32 h-32 mx-auto bg-gradient-to-br from-white to-purple-100 rounded-full flex items-center justify-center mb-6 logo-float glow-effect">
               <Image
-                src="/imagen/Logo_Valenttine.png"
-                alt="Logo Valenttine"
+                src="/imagen/Logo_Colon.jpg"
+                alt="Logo Colon"
                 width={100}
                 height={100}
                 className="w-220 h-220 object-contain"
@@ -118,15 +118,15 @@ export default function LoginPage() {
               />
             </div>
             <div className="space-y-2">
-              <h1 className="text-4xl font-bold font-display text-white/90 leading-tight">
-                Centro Médico
+              <h1 className="text-4xl font-bold font-display text-[#0B1D51] leading-tight">
+                Hotel
               </h1>
-              <h2 className="text-3xl font-bold font-display text-purple-200 tracking-wide">
-                Estético
+              <h2 className="text-3xl font-bold font-display text-[#0B1D51] tracking-wide">
+                Spa
               </h2>
               <div className="relative">
-                <h3 className="text-5xl font-extrabold font-display bg-gradient-to-r from-yellow-300 via-pink-300 to-purple-300 bg-clip-text text-transparent">
-                  Valenttine
+                <h3 className="text-5xl font-extrabold font-display text-[#725CAD] bg-clip-text">
+                  Colon
                 </h3>
                 <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-yellow-400 to-pink-400 rounded-full" />
               </div>
@@ -135,8 +135,8 @@ export default function LoginPage() {
 
           <div className="space-y-6">
             <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
-              <p className="text-xl text-purple-100 leading-relaxed font-medium">
-                Bienvenido a tu plataforma de gestión de salud
+              <p className="text-xl text-purple-500 leading-relaxed font-medium">
+                Bienvenido a la página del mejor Hotel en Vice City
               </p>
               <div className="mt-4 flex justify-center gap-2">
                 <div className="w-2 h-2 bg-purple-300 rounded-full animate-pulse" />
@@ -152,9 +152,9 @@ export default function LoginPage() {
             </div>
             <div className="grid grid-cols-3 gap-4 mt-8">
               {[
-                { icon: '🏥', label: 'Atención Integral' },
-                { icon: '👨‍⚕️', label: 'Profesionales' },
-                { icon: '💙', label: 'Cuidado Humano' },
+                { icon: '', label: '' },
+                { icon: '', label: '' },
+                { icon: '', label: '' },
               ].map((f) => (
                 <div key={f.label} className="text-center">
                   <div className="w-12 h-12 mx-auto bg-white/20 rounded-xl flex items-center justify-center mb-2">
@@ -188,7 +188,7 @@ export default function LoginPage() {
             <form onSubmit={onSubmit} className="space-y-6">
               {/* Usuario */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-3">Nombre de usuario</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">Correo Electónico</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
@@ -196,22 +196,22 @@ export default function LoginPage() {
                     </svg>
                   </div>
                   <Input
-                    value={form.username}
+                    value={form.email}
                     onChange={(e) =>
                       setForm((prev) => ({
                         ...prev,
-                        username: e.target.value.replace(/\s/g, '').slice(0, 11),
+                        email: e.target.value.replace(/\s/g, '').slice(0, 30),
                       }))
                     }
-                    placeholder="Ingrese su usuario"
+                    placeholder="Ingrese su correo electrónico"
                     className="pl-12 py-4"
-                    maxLength={11}
+                    maxLength={30}
                     autoComplete="username"
                   />
                 </div>
-                {form.username.length > 0 && (
+                {form.email.length > 0 && (
                   <div className="mt-2 text-sm">
-                    {usernameOk ? (
+                    {mailOk ? (
                       <span className="text-green-600 font-medium">Usuario válido</span>
                     ) : (
                       <span className="text-red-600 font-medium">Usuario inválido</span>

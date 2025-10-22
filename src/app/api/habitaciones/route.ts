@@ -1,0 +1,31 @@
+// En: src/app/api/habitaciones/route.ts
+
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma'; // Asegúrate de que la ruta a tu cliente de Prisma sea correcta
+
+export async function GET() {
+  try {
+    // Consultamos la base de datos para obtener todas las habitaciones
+    const habitaciones = await prisma.habitacion.findMany({
+      // Usamos 'include' para traer también los servicios relacionados
+      include: {
+        servicios: {
+          include: {
+            servicio: true, // Esto nos trae los detalles de cada servicio (nombre, descripción)
+          },
+        },
+      },
+      orderBy: {
+        numero: 'asc', // Ordenamos las habitaciones por su número
+      },
+    });
+
+    return NextResponse.json(habitaciones);
+  } catch (error) {
+    console.error('Error al obtener las habitaciones:', error);
+    return NextResponse.json(
+      { error: 'No se pudo obtener la información de las habitaciones.' },
+      { status: 500 }
+    );
+  }
+}

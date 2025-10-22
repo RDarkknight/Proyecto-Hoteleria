@@ -183,7 +183,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "C:\\Users\\Josefina\\Desktop\\Python\\Proyecto lenguajes\\Proyecto-Hoteleria\\src\\generated\\prisma",
+      "value": "R:\\Ucasal\\Proyecto Hotelería\\hoteleria\\src\\generated\\prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -197,11 +197,12 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "C:\\Users\\Josefina\\Desktop\\Python\\Proyecto lenguajes\\Proyecto-Hoteleria\\prisma\\schema.prisma",
+    "sourceFilePath": "R:\\Ucasal\\Proyecto Hotelería\\hoteleria\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
-    "rootEnvPath": null
+    "rootEnvPath": null,
+    "schemaEnvPath": "../../../.env"
   },
   "relativePath": "../../../prisma",
   "clientVersion": "6.17.0",
