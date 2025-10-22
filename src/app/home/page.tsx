@@ -41,7 +41,7 @@ export default async function HomePage() {
     <main className="container mx-auto px-4 py-8">
       {/* Sección Hero (la dejamos como la planeamos) */}
       <section className="text-center mb-16">
-        <h1 className="text-4xl md:text-5xl font-bold">
+        <h1 className="text-4xl md:text-5xl font-bold font-display">
           Tu descanso ideal te está esperando
         </h1>
         <p className="text-lg text-muted-foreground mt-4">

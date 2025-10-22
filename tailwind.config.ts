@@ -14,20 +14,26 @@ module.exports = {
       screens: { "2xl": "1400px" },
     },
     extend: {
+      fontFamily: { // <-- AÑADE ESTE BLOQUE
+        sans: ['var(--font-sans)'],
+        display: ['var(--font-display)'],
+      },
+
       colors: {
+        
         'test-color': '#00FF00',
         // AQUÍ ESTÁ LA MAGIA: DEFINIMOS LOS COLORES DIRECTAMENTE
         border: "hsl(214.3 31.8% 91.4%)",
         input: "hsl(214.3 31.8% 91.4%)",
         ring: "hsl(346.8 77.2% 49.8%)",
-        background: "hsl(210 40% 98%)",
+        background: "hsl(214.3 31.8% 91.4%)",
         foreground: "hsl(222.2 84% 4.9%)",
         primary: {
           DEFAULT: "hsl(346.8 77.2% 49.8%)",
           foreground: "hsl(355.7 100% 97.3%)",
         },
         secondary: {
-          DEFAULT: "hsl(170 40% 45%)",
+          DEFAULT: "hsl(170 70% 55%)",
           foreground: "hsl(0 0% 98%)",
         },
         destructive: {
@@ -35,7 +41,7 @@ module.exports = {
           foreground: "hsl(0 0% 98%)",
         },
         muted: {
-          DEFAULT: "hsl(210 40% 96.1%)",
+          DEFAULT: "hsl(187 97% 40%)",
           foreground: "hsl(215.4 16.3% 46.9%)",
         },
         accent: {

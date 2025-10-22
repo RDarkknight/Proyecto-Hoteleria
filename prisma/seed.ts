@@ -63,3 +63,33 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+
+  // --- Añadir Imágenes de Habitación ---
+console.log('Limpiando imágenes antiguas...');
+await prisma.habitacionImagen.deleteMany({});
+
+console.log('Añadiendo nuevas imágenes...');
+await prisma.habitacionImagen.createMany({
+  data: [
+    // Imágenes para la Habitación 1
+    {
+      habitacionId: 1, // Asegúrate de que este ID exista en tu BD
+      url: 'https://images.unsplash.com/photo-1566073771259-6a8506099945',
+      altText: 'Vista de la piscina del resort',
+    },
+    {
+      habitacionId: 1,
+      url: 'https://images.unsplash.com/photo-1596394516093-501ba68a0ba6',
+      altText: 'Cama doble con sábanas blancas',
+    },
+    {
+      habitacionId: 1,
+      url: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b',
+      altText: 'Baño de lujo con bañera',
+    },
+  ],
+});
+console.log('Imágenes añadidas con éxito.');
+
+console.log('Seed script finalizado.');
+// ... (el resto de tu función main)

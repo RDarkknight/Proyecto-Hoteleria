@@ -91,7 +91,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex">
       {/* Izquierda (hero) — diseño intacto */}
-      <div className="flex-1 gradient-animated flex flex-col justify-center items-center text-white p-8 relative overflow-hidden">
+      <div className="flex-1 flex flex-col justify-center items-center p-8 relative overflow-hidden">
         <div className="absolute top-10 left-10 w-32 h-32 bg-white/5 rounded-full blur-xl" />
         <div className="absolute bottom-20 right-10 w-24 h-24 bg-purple-300/10 rounded-full blur-lg" />
         <div className="absolute top-1/2 left-5 w-16 h-16 bg-indigo-300/10 rounded-full blur-md" />
@@ -117,25 +117,26 @@ export default function LoginPage() {
                 priority
               />
             </div>
-            <div className="space-y-2">
-              <h1 className="text-4xl font-bold font-display text-[#0B1D51] leading-tight">
-                Hotel
-              </h1>
-              <h2 className="text-3xl font-bold font-display text-[#0B1D51] tracking-wide">
-                Spa
-              </h2>
-              <div className="relative">
-                <h3 className="text-5xl font-extrabold font-display text-[#725CAD] bg-clip-text">
+              <div className="space-y-2 text-center">
+                {/* Usamos 'text-primary' para darle nuestro color rosa/coral 
+                  y lo hacemos mucho más grande.
+                */}
+                <h1 className="text-6xl font-extrabold text-primary drop-shadow-md">
                   Colon
-                </h3>
-                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-yellow-400 to-pink-400 rounded-full" />
+                </h1>
+
+                {/* Usamos 'text-foreground' para el color de texto normal (oscuro)
+                  y 'tracking-widest' para darle un estilo "Miami" más espaciado.
+                */}
+                <h2 className="text-2xl font-medium text-foreground uppercase tracking-widest">
+                  Hotel • Spa
+                </h2>
               </div>
-            </div>
           </div>
 
           <div className="space-y-6">
             <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
-              <p className="text-xl text-purple-500 leading-relaxed font-medium">
+              <p className="text-xl text-muted-foreground leading-relaxed font-medium">
                 Bienvenido a la página del mejor Hotel en Vice City
               </p>
               <div className="mt-4 flex justify-center gap-2">
@@ -152,9 +153,9 @@ export default function LoginPage() {
             </div>
             <div className="grid grid-cols-3 gap-4 mt-8">
               {[
-                { icon: '', label: '' },
-                { icon: '', label: '' },
-                { icon: '', label: '' },
+                { icon: '🌴', label: '' },
+                { icon: '🥥', label: '' },
+                { icon: '🌊', label: '' },
               ].map((f) => (
                 <div key={f.label} className="text-center">
                   <div className="w-12 h-12 mx-auto bg-white/20 rounded-xl flex items-center justify-center mb-2">
@@ -169,12 +170,12 @@ export default function LoginPage() {
       </div>
 
       {/* Derecha (form) — diseño intacto, cambia a username */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-gradient-to-bl from-gray-50 to-white">
+      <div className="flex-1 flex items-center justify-center p-8">
         <div className="w-full max-w-md form-slide-in">
           <div className="bg-white rounded-3xl shadow-2xl p-8 border border-gray-100 relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-purple-500 via-indigo-500 to-blue-500" />
+            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary to-rose-400" />
             <div className="text-center mb-8">
-              <div className="w-16 h-16 mx-auto bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
+              <div className="w-16 h-16 mx-auto bg-gradient-to-br from-primary to-rose-400 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
                 <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
                 </svg>

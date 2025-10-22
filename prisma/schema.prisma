@@ -44,6 +44,7 @@ model Habitacion {
   estado       String    // "Disponible", "Ocupada", "Mantenimiento"
   reservas     Reserva[]
   servicios    ServicioEnHabitacion[]
+  imagenes     HabitacionImagen[]
 }
 
 model Reserva {
@@ -89,4 +90,24 @@ model ServicioEnHabitacion {
   servicioId   Int
 
   @@id([habitacionId, servicioId])
+}
+
+// Modelo para guardar las consultas de contacto
+model Consulta {
+  id        Int      @id @default(autoincrement())
+  nombre    String
+  email     String
+  mensaje   String   @db.Text // @db.Text es mejor para mensajes largos
+  leido     Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model HabitacionImagen {
+  id           Int      @id @default(autoincrement())
+  url          String   @db.Text
+  altText      String?  @db.Text
+  habitacionId Int
+  habitacion   Habitacion @relation(fields: [habitacionId], references: [id], onDelete: Cascade)
+
+  @@index([habitacionId])
 }
