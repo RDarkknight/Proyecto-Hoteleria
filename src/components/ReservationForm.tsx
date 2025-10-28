@@ -116,7 +116,8 @@ async function onSubmit(data: z.infer<typeof FormSchema>) {
                     defaultMonth={field.value?.from}
                     selected={field.value}
                     onSelect={field.onChange}
-                    numberOfMonths={2}
+                    numberOfMonths={1}
+                    disabled={{ before: new Date() }}
                   />
                 </PopoverContent>
               </Popover>

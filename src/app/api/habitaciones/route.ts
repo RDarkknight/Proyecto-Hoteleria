@@ -9,11 +9,8 @@ export async function GET() {
     const habitaciones = await prisma.habitacion.findMany({
       // Usamos 'include' para traer también los servicios relacionados
       include: {
-        servicios: {
-          include: {
-            servicio: true, // Esto nos trae los detalles de cada servicio (nombre, descripción)
-          },
-        },
+        servicios: {include: {servicio: true }},
+        
       },
       orderBy: {
         numero: 'asc', // Ordenamos las habitaciones por su número

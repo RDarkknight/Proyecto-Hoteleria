@@ -1,10 +1,11 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { type FormEvent, useEffect, useState } from 'react'
 import { Button} from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import { type LoginResponse, LoginResponseSchema } from '@/lib/usuarios/types'
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter()
@@ -16,6 +17,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [banner, setBanner] = useState<string | null>(null) // mensajes (bienvenida / flash)
+  const [showPassword, setShowPassword] = useState(false);
 
   // mostrar mensajes “flash” (logout ok / inactividad)
   useEffect(() => {
@@ -231,19 +233,29 @@ export default function LoginPage() {
                     </svg>
                   </div>
                   <Input
-                    type="password"
+                    id="password" // Añadimos id para conectar con el label
+                    // CAMBIO: El tipo ahora depende del estado showPassword
+                    type={showPassword ? 'text' : 'password'}
                     value={form.password}
                     onChange={(e) =>
                       setForm((prev) => ({
                         ...prev,
-                        password: e.target.value.replace(/\s/g, '').slice(0, 11),
+                        password: e.target.value.replace(/\s/g, '').slice(0, 30), // Ajustamos longitud
                       }))
                     }
                     placeholder="Ingrese su contraseña"
                     className="pl-12 py-4"
-                    maxLength={11}
+                    maxLength={40}
                     autoComplete="current-password"
                   />
+                  <button
+                    type="button" // Importante para que no envíe el formulario
+                    onClick={() => setShowPassword(!showPassword)} // Cambia el estado
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
+                    aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
                 </div>
               </div>
 
@@ -264,7 +276,7 @@ export default function LoginPage() {
                   disabled={!canSubmit}
                   className={
                     canSubmit
-                      ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white'
+                      ? 'bg-red-600 text-white'
                       : ''
                   }
                 >

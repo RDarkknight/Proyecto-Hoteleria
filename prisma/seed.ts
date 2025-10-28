@@ -1,6 +1,6 @@
 // En: prisma/seed.ts
 
-import { PrismaClient, RolUsuario } from '../src/generated/prisma/index.js';
+import { PrismaClient, RolUsuario } from '@prisma/client';
 import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
