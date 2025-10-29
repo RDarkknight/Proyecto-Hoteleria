@@ -7,13 +7,18 @@ export async function GET() {
   try {
     // Consultamos la base de datos para obtener todas las habitaciones
     const habitaciones = await prisma.habitacion.findMany({
-      // Usamos 'include' para traer también los servicios relacionados
       include: {
-        servicios: {include: {servicio: true }},
-        
+        servicios: { include: { servicio: true } },
+        // Añadimos la inclusión de las imágenes
+        imagenes: {
+          take: 1, // Solo queremos la primera imagen
+          orderBy: {
+            id: 'asc', // Ordenamos por ID para asegurar consistencia
+          },
+        },
       },
       orderBy: {
-        numero: 'asc', // Ordenamos las habitaciones por su número
+        numero: 'asc',
       },
     });
 

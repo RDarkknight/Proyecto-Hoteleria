@@ -6,8 +6,10 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import { type LoginResponse, LoginResponseSchema } from '@/lib/usuarios/types'
 import { Eye, EyeOff } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext'
 
 export default function LoginPage() {
+  const { login } = useAuth()
   const router = useRouter()
   const search = useSearchParams()
   const nextPath = search.get('next')
@@ -68,17 +70,24 @@ export default function LoginPage() {
         setError(data.error)
         return
       }
+      
+      // 1. Actualizamos el estado global de la sesión
+      login({
+        nombre: data.user.nombre,
+        email: data.user.email,
+        role: data.role,
+      });
 
-      // Bienvenida 5s y redirección
+      // 2. Bienvenida y redirección (como antes)
       setBanner(`Bienvenido, ${data.user.nombre}`);
       setTimeout(() => {
         if (nextPath) return router.replace(nextPath);
-        // Redirección basada en los roles de nuestro Enum
+        
         if (data.role === 'ADMINISTRADOR') {
           router.replace('/admin/dashboard');
         } else if (data.role === 'OPERADOR') {
           router.replace('/operator/dashboard');
-        } else { // El rol por defecto es 'USUARIO'
+        } else {
           router.replace('/home'); 
         }
 
@@ -158,8 +167,8 @@ export default function LoginPage() {
                 { icon: '🌴', label: '' },
                 { icon: '🥥', label: '' },
                 { icon: '🌊', label: '' },
-              ].map((f) => (
-                <div key={f.label} className="text-center">
+              ].map((f, index) => ( // <-- Añade 'index' aquí
+                <div key={index} className="text-center"> {/* <-- Usa 'index' como key */}
                   <div className="w-12 h-12 mx-auto bg-white/20 rounded-xl flex items-center justify-center mb-2">
                     <span className="text-2xl">{f.icon}</span>
                   </div>

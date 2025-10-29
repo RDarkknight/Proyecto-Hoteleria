@@ -6,6 +6,8 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -17,7 +19,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'; // Shadcn creará este archivo por ti si no existe
+} from '@/components/ui/form';
 import {
   Popover,
   PopoverContent,
@@ -25,7 +27,6 @@ import {
 } from '@/components/ui/popover';
 import { Input } from '@/components/ui/input';
 
-// 1. Definimos el esquema de validación con Zod
 const FormSchema = z.object({
   dateRange: z.object({
     from: z.date({ required_error: 'La fecha de inicio es requerida.' }),
@@ -35,6 +36,9 @@ const FormSchema = z.object({
 });
 
 export function ReservationForm({ habitacionId }: { habitacionId: number }) {
+  const { session } = useAuth();
+  const router = useRouter();
+
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -42,10 +46,13 @@ export function ReservationForm({ habitacionId }: { habitacionId: number }) {
     },
   });
 
-async function onSubmit(data: z.infer<typeof FormSchema>) {
+  async function onSubmit(data: z.infer<typeof FormSchema>) {
+    if (!session) {
+      router.push(`/login?next=/habitaciones/${habitacionId}`);
+      return;
+    }
+
     try {
-      // CAMBIO: La llamada fetch ahora es mucho más simple.
-      // El navegador enviará la cookie de autenticación automáticamente.
       const response = await fetch('/api/reservas', {
         method: 'POST',
         headers: {
@@ -60,8 +67,9 @@ async function onSubmit(data: z.infer<typeof FormSchema>) {
       });
 
       if (response.ok) {
-        alert('¡Reserva creada con éxito!');
-        // Aquí podríamos redirigir al usuario o limpiar el formulario
+        const nuevaReserva = await response.json();
+        // Redirigimos al usuario a la página de confirmación con el ID de la nueva reserva
+        router.push(`/reservas/${nuevaReserva.id}`);
       } else {
         const errorData = await response.json();
         alert(`Error al reservar: ${errorData.error || 'Inténtelo de nuevo.'}`);

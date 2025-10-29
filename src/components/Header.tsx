@@ -1,21 +1,16 @@
 // En: src/components/Header.tsx
+'use client';
 
 import Link from 'next/link';
-import { cookies } from 'next/headers';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { verifyJwt } from '@/lib/usuarios/auth';
-import type { JwtUser } from '@/lib/usuarios/types'; // Asegúrate de que este tipo exista
+import { useAuth } from '@/context/AuthContext';
 import { LogoutButton } from './LogoutButton';
 
-export async function Header() {
-  const token = cookies().get('auth_token')?.value;
-  let user: JwtUser | null = null;
-
-  // Verificamos el token para obtener los datos del usuario
-  if (token) {
-    user = verifyJwt<JwtUser>(token);
-  }
+export function Header() {
+  // Usamos el hook useAuth que funciona en el lado del cliente
+  const { session } = useAuth();
+  const user = session;
 
   return (
     <header className="bg-black/40 sticky top-0 z-50 w-full border-b border-white/30 backdrop-blur-lg">
@@ -25,8 +20,7 @@ export async function Header() {
           Colon Hotel
         </Link>
 
-        {/* ESTA ES LA SECCIÓN DE NAVEGACIÓN QUE FALTABA 
-        */}
+        {/* Sección de Navegación */}
         <nav className="hidden items-center space-x-6 text-sm font-medium md:flex">
           <Link
             href="/home"
@@ -35,30 +29,29 @@ export async function Header() {
             Inicio
           </Link>
           <Link
-            href="/habitaciones" // Apunta a la página de detalles de las habitaciones
+            href="/habitaciones"
             className="text-base font-medium text-white/80 transition-colors hover:text-white"
           >
             Habitaciones
           </Link>
           <Link
-            href="/servicios" // Futura página de servicios
+            href="/servicios"
             className="text-base font-medium text-white/80 transition-colors hover:text-white"
           >
             Servicios
           </Link>
           <Link
-            href="/contacto" // La página de contacto que estamos por crear
+            href="/contacto"
             className="text-base font-medium text-white/80 transition-colors hover:text-white"
           >
             Contacto
           </Link>
         </nav>
 
-        {/* ESTA ES LA LÓGICA DE INICIO/CIERRE DE SESIÓN 
-        */}
+        {/* Lógica de Inicio/Cierre de Sesión */}
         <div className="flex items-center space-x-4">
           {user ? (
-            // --- Si el usuario HA INICIADO SESIÓN ---
+            // Si el usuario HA INICIADO SESIÓN
             <>
               <div className="flex flex-col items-end">
                 <span className="text-sm font-medium">
@@ -69,7 +62,7 @@ export async function Header() {
               <LogoutButton />
             </>
           ) : (
-            // --- Si el usuario NO HA INICIADO SESIÓN ---
+            // Si el usuario NO HA INICIADO SESIÓN
             <Button asChild>
               <Link href="/login">Iniciar Sesión</Link>
             </Button>

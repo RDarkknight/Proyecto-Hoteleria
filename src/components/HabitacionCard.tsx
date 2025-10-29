@@ -12,19 +12,32 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
-// Definimos qué información necesita nuestra tarjeta para mostrar una habitación
-// Usaremos esto más adelante para pasarle los datos desde la API
+// 1. Actualizamos la definición de tipos para incluir las imágenes
 export type HabitacionProps = {
   habitacion: {
     id: number;
     tipo: string;
     descripcion: string | null;
     precioPorNoche: number;
-    // Agregaremos más campos como la imagen aquí
+    // El campo 'imagenes' es un array que puede contener cero o un objeto de imagen
+    imagenes: {
+      id: number;
+      url: string;
+      altText: string | null;
+    }[];
   };
 };
 
 export function HabitacionCard({ habitacion }: HabitacionProps) {
+  // 2. Extraemos la primera imagen o usamos null si no hay ninguna
+  const primeraImagen = habitacion.imagenes && habitacion.imagenes.length > 0
+    ? habitacion.imagenes[0]
+    : null;
+
+  // 3. Definimos la URL final de la imagen, con un fallback
+  const imageUrl = primeraImagen?.url || "https://images.unsplash.com/photo-1611892440504-42a792e24d32";
+  const imageAlt = primeraImagen?.altText || `Foto de la habitación ${habitacion.tipo}`;
+
   return (
     <Card className="flex flex-col">
       <CardHeader>
@@ -34,13 +47,13 @@ export function HabitacionCard({ habitacion }: HabitacionProps) {
         </CardDescription>
       </CardHeader>
       <CardContent className="flex-grow">
-        {/* Aquí iría la imagen de la habitación */}
         <div className="relative aspect-video w-full overflow-hidden rounded-md">
+          {/* 4. Usamos las variables dinámicas en el componente Image */}
           <Image
-            src="https://images.unsplash.com/photo-1611892440504-42a792e24d32" // Imagen de prueba
-            alt={`Foto de la habitación ${habitacion.tipo}`}
+            src={imageUrl}
+            alt={imageAlt}
             fill
-            className="object-cover"
+            className="object-cover transition-transform duration-300 hover:scale-105"
           />
         </div>
       </CardContent>

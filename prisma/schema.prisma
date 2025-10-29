@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,8 +9,6 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-
-// Enum para definir los roles permitidos en el sistema
 
 enum RolUsuario {
   USUARIO
@@ -27,87 +22,80 @@ model Usuario {
   apellido  String
   email     String   @unique
   password  String
-  rol       RolUsuario @default(USUARIO) // Usamos el Enum y por defecto es USUARIO
+  rol       RolUsuario @default(USUARIO)
   reservas  Reserva[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Habitacion {
-  id           Int       @id @default(autoincrement())
-  numero       Int       @unique
-  piso         Int?
-  tipo         String    // "Single", "Doble", "Suite"
-  descripcion  String?
-  capacidad    Int       @default(1)
+  id             Int       @id @default(autoincrement())
+  numero         Int       @unique
+  piso           Int?
+  tipo           String
+  descripcion    String?
+  capacidad      Int       @default(1)
   precioPorNoche Float
-  estado       String    // "Disponible", "Ocupada", "Mantenimiento"
-  reservas     Reserva[]
-  servicios    ServicioEnHabitacion[]
-  imagenes     HabitacionImagen[]
+  estado         String
+  reservas       Reserva[]
+  servicios      ServicioEnHabitacion[]
+  imagenes       HabitacionImagen[] // Relación inversa a HabitacionImagen
 }
 
 model Reserva {
-  id           Int      @id @default(autoincrement())
-  usuarioId    Int
-  habitacionId Int
-  fechaInicio  DateTime
-  fechaFin     DateTime
-  numeroHuespedes Int @default(1)
-  estado       String   // "Pendiente", "Confirmada", "Cancelada", "Completada"
-  createdAt    DateTime @default(now())
-
-  usuario    Usuario    @relation(fields: [usuarioId], references: [id])
-  habitacion Habitacion @relation(fields: [habitacionId], references: [id])
-  pagos      Pago[]
-
+  id              Int      @id @default(autoincrement())
+  usuarioId       Int
+  habitacionId    Int
+  fechaInicio     DateTime
+  fechaFin        DateTime
+  numeroHuespedes Int      @default(1)
+  estado          String
+  createdAt       DateTime @default(now())
+  usuario         Usuario  @relation(fields: [usuarioId], references: [id])
+  habitacion      Habitacion @relation(fields: [habitacionId], references: [id])
+  pagos           Pago[]
   @@index([usuarioId])
   @@index([habitacionId])
 }
 
 model Pago {
-  id         Int       @id @default(autoincrement())
-  reservaId  Int
-  monto      Float
-  metodo     String?    // "tarjeta", "efectivo", "transferencia"
-  estado     String?    // "pendiente", "pagado"
-
-  reserva    Reserva   @relation(fields: [reservaId], references: [id])
+  id        Int     @id @default(autoincrement())
+  reservaId Int
+  monto     Float
+  metodo    String?
+  estado    String?
+  reserva   Reserva @relation(fields: [reservaId], references: [id])
 }
-// Modelo para los servicios que ofrece el hotel (ej. Wi-Fi, Desayuno, etc.)
+
 model Servicio {
-  id          Int       @id @default(autoincrement())
-  nombre      String    @unique
-  descripcion String?
+  id           Int                    @id @default(autoincrement())
+  nombre       String                 @unique
+  descripcion  String?
   habitaciones ServicioEnHabitacion[]
 }
 
-// Tabla intermedia para la relación muchos a muchos entre Habitacion y Servicio
 model ServicioEnHabitacion {
   habitacion   Habitacion @relation(fields: [habitacionId], references: [id])
   habitacionId Int
   servicio     Servicio   @relation(fields: [servicioId], references: [id])
   servicioId   Int
-
   @@id([habitacionId, servicioId])
 }
 
-// Modelo para guardar las consultas de contacto
 model Consulta {
   id        Int      @id @default(autoincrement())
   nombre    String
   email     String
-  mensaje   String   @db.Text // @db.Text es mejor para mensajes largos
+  mensaje   String
   leido     Boolean  @default(false)
   createdAt DateTime @default(now())
 }
 
 model HabitacionImagen {
   id           Int      @id @default(autoincrement())
-  url          String   @db.Text
-  altText      String?  @db.Text
+  url          String
+  altText      String?
   habitacionId Int
   habitacion   Habitacion @relation(fields: [habitacionId], references: [id], onDelete: Cascade)
-
   @@index([habitacionId])
 }

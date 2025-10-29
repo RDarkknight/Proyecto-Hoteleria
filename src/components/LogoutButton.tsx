@@ -3,22 +3,20 @@
 
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/context/AuthContext'; // 1. Importamos useAuth
 
 export function LogoutButton() {
   const router = useRouter();
+  const { logout } = useAuth(); // 2. Obtenemos la función logout del contexto
 
   const handleLogout = async () => {
-    const response = await fetch('/api/logout', {
-      method: 'POST',
-    });
-
-    if (response.ok) {
-      // Redirigir al usuario a la página de inicio o login
-      router.push('/login');
-      router.refresh(); // Refresca la página para actualizar el estado del Header
-    } else {
-      alert('Error al cerrar la sesión.');
-    }
+    // 3. Llamamos a la función del contexto.
+    // Esta se encarga de la API y de limpiar el estado local.
+    await logout(); 
+    
+    // 4. Redirigimos al usuario
+    router.push('/login');
+    // Ya no necesitamos router.refresh()
   };
 
   return (
