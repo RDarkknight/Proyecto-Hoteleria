@@ -4,8 +4,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useMemo } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-
+import { useAuth } from '@/context/AuthContext';
 type RoleKey = 'RECEPCIONISTA' | 'MEDICO' | 'GERENTE';
 
 const ACL: Record<string, RoleKey[]> = {

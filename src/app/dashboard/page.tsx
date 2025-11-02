@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { useMemo } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/context/AuthContext';
 
 type RoleKey = 'RECEPCIONISTA' | 'MEDICO' | 'GERENTE';
 

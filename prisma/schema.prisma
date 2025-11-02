@@ -36,10 +36,12 @@ model Habitacion {
   descripcion    String?
   capacidad      Int       @default(1)
   precioPorNoche Float
-  estado         String
+  estadoId       Int       @default(1) // Default to 'Libre'
+  estado         EstadoHabitacion @relation(fields: [estadoId], references: [id])
   reservas       Reserva[]
   servicios      ServicioEnHabitacion[]
   imagenes       HabitacionImagen[] // Relación inversa a HabitacionImagen
+  @@index([estadoId])
 }
 
 model Reserva {
@@ -98,4 +100,10 @@ model HabitacionImagen {
   habitacionId Int
   habitacion   Habitacion @relation(fields: [habitacionId], references: [id], onDelete: Cascade)
   @@index([habitacionId])
+}
+
+model EstadoHabitacion {
+  id        Int      @id @default(autoincrement())
+  nombre    String   @unique
+  habitaciones Habitacion[]
 }

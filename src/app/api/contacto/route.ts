@@ -29,6 +29,8 @@ const nuevaConsulta = await prisma.consulta.create({
         mensaje: mensaje,
       },
     });
+    return NextResponse.json({ message: 'Consulta creada con éxito' }, { status: 200 });
+    
   } catch (error) {
     console.error('Error al procesar la consulta:', error);
     return NextResponse.json(

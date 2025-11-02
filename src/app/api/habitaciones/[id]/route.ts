@@ -25,7 +25,7 @@ import { prisma } from '@/lib/prisma';
                 servicio: true,
               },
             },
-          
+            imagenes: true
           },
         });
 

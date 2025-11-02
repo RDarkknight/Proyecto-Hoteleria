@@ -1,7 +1,7 @@
 // En: src/components/HabitacionCard.tsx
-import Link from 'next/link'; // Asegúrate de que Link esté importado al principio del archivo
 
 import Image from 'next/image';
+import Link from 'next/link';
 import {
   Card,
   CardContent,
@@ -11,32 +11,19 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import type { Habitacion, HabitacionImagen } from '@prisma/client'; // Importamos tipos
 
-// 1. Actualizamos la definición de tipos para incluir las imágenes
-export type HabitacionProps = {
-  habitacion: {
-    id: number;
-    tipo: string;
-    descripcion: string | null;
-    precioPorNoche: number;
-    // El campo 'imagenes' es un array que puede contener cero o un objeto de imagen
-    imagenes: {
-      id: number;
-      url: string;
-      altText: string | null;
-    }[];
-  };
+// 1. Definimos un tipo que espera la lista de imágenes
+export type HabitacionConImagen = Habitacion & {
+  imagenes: HabitacionImagen[];
 };
 
-export function HabitacionCard({ habitacion }: HabitacionProps) {
-  // 2. Extraemos la primera imagen o usamos null si no hay ninguna
-  const primeraImagen = habitacion.imagenes && habitacion.imagenes.length > 0
-    ? habitacion.imagenes[0]
-    : null;
+export function HabitacionCard({ habitacion }: { habitacion: HabitacionConImagen }) {
 
-  // 3. Definimos la URL final de la imagen, con un fallback
-  const imageUrl = primeraImagen?.url || "https://images.unsplash.com/photo-1611892440504-42a792e24d32";
-  const imageAlt = primeraImagen?.altText || `Foto de la habitación ${habitacion.tipo}`;
+  // 2. Obtenemos la URL de la primera imagen de forma segura
+  const imageUrl = habitacion.imagenes[0]?.url
+    ? habitacion.imagenes[0].url
+    : 'https://images.unsplash.com/photo-1566073771259-6a8506099945'; // Imagen de reserva
 
   return (
     <Card className="flex flex-col">
@@ -47,13 +34,13 @@ export function HabitacionCard({ habitacion }: HabitacionProps) {
         </CardDescription>
       </CardHeader>
       <CardContent className="flex-grow">
+        {/* 3. Usamos la variable imageUrl en el componente Image */}
         <div className="relative aspect-video w-full overflow-hidden rounded-md">
-          {/* 4. Usamos las variables dinámicas en el componente Image */}
           <Image
             src={imageUrl}
-            alt={imageAlt}
+            alt={`Foto de la habitación ${habitacion.tipo}`}
             fill
-            className="object-cover transition-transform duration-300 hover:scale-105"
+            className="object-cover"
           />
         </div>
       </CardContent>

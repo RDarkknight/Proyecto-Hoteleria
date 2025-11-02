@@ -6,9 +6,9 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
-
+import { useMemo, useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation'; // <-- 2. IMPORTAMOS useRouter
+import { type DateRange } from 'react-day-picker';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -27,17 +27,62 @@ import {
 } from '@/components/ui/popover';
 import { Input } from '@/components/ui/input';
 
-const FormSchema = z.object({
-  dateRange: z.object({
-    from: z.date({ required_error: 'La fecha de inicio es requerida.' }),
-    to: z.date({ required_error: 'La fecha de fin es requerida.' }),
-  }),
-  numberOfGuests: z.coerce.number().min(1, 'Debe haber al menos un huésped.'),
-});
+// 3. IMPORTAMOS LOS COMPONENTES DEL DIALOG (POP-UP)
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
 
-export function ReservationForm({ habitacionId }: { habitacionId: number }) {
-  const { session } = useAuth();
-  const router = useRouter();
+// 4. DEFINIMOS UN TIPO PARA EL ESTADO DEL POP-UP
+type DialogState = {
+  open: boolean;
+  title: string;
+  description: string;
+  isError: boolean;
+};
+
+export function ReservationForm({
+  habitacionId,
+  capacidadMaxima,
+}: {
+  habitacionId: number;
+  capacidadMaxima: number;
+}) {
+  const router = useRouter(); // Hook para la navegación
+  const [isSubmitting, setIsSubmitting] = useState(false); // NUEVO: Estado para el botón de carga
+  
+  // 5. ESTADO PARA MANEJAR EL POP-UP
+  const [dialogState, setDialogState] = useState<DialogState>({
+    open: false,
+    title: '',
+    description: '',
+    isError: false,
+  });
+  const [bookedDates, setBookedDates] = useState<DateRange[]>([]);
+
+  
+  // El esquema de validación con useMemo (esto ya estaba bien)
+  const FormSchema = useMemo(
+    () =>
+      z.object({
+        dateRange: z.object({
+          from: z.date({ required_error: 'La fecha de inicio es requerida.' }),
+          to: z.date({ required_error: 'La fecha de fin es requerida.' }),
+        }),
+        numberOfGuests: z.coerce
+          .number()
+          .min(1, 'Debe haber al menos un huésped.')
+          .max(
+            capacidadMaxima,
+            `La capacidad máxima de esta habitación es ${capacidadMaxima}.`
+          ),
+      }),
+    [capacidadMaxima]
+  );
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -46,12 +91,32 @@ export function ReservationForm({ habitacionId }: { habitacionId: number }) {
     },
   });
 
-  async function onSubmit(data: z.infer<typeof FormSchema>) {
-    if (!session) {
-      router.push(`/login?next=/habitaciones/${habitacionId}`);
-      return;
+  useEffect(() => {
+    async function fetchBookedDates() {
+      try {
+        const response = await fetch(`/api/habitaciones/${habitacionId}/reservas`);
+        if (!response.ok) return;
+
+        const data: { fechaInicio: string; fechaFin: string }[] = await response.json();
+        
+        // Convertimos las fechas de texto (JSON) a objetos Date
+        const dateRanges = data.map((reserva) => ({
+          from: new Date(reserva.fechaInicio),
+          to: new Date(reserva.fechaFin),
+        }));
+        
+        setBookedDates(dateRanges);
+      } catch (error) {
+        console.error("Error al buscar fechas reservadas:", error);
+      }
     }
 
+    fetchBookedDates();
+  }, [habitacionId]); // Se ejecuta cada vez que el ID de la habitación cambie
+
+  // 6. ACTUALIZAMOS onSubmit PARA USAR EL POP-UP (NO MÁS 'alert()')
+  async function onSubmit(data: z.infer<typeof FormSchema>) {
+    setIsSubmitting(true);
     try {
       const response = await fetch('/api/reservas', {
         method: 'POST',
@@ -67,92 +132,147 @@ export function ReservationForm({ habitacionId }: { habitacionId: number }) {
       });
 
       if (response.ok) {
-        const nuevaReserva = await response.json();
-        // Redirigimos al usuario a la página de confirmación con el ID de la nueva reserva
-        router.push(`/reservas/${nuevaReserva.id}`);
+        setDialogState({
+          open: true,
+          title: '¡Reserva Confirmada!',
+          description: 'Tu habitación ha sido reservada. Recibirás un email de confirmación pronto.',
+          isError: false,
+        });
+        form.reset();
       } else {
         const errorData = await response.json();
-        alert(`Error al reservar: ${errorData.error || 'Inténtelo de nuevo.'}`);
+        setDialogState({
+          open: true,
+          title: 'Error al Reservar',
+          description: errorData.error || 'No se pudo completar la reserva. Inténtalo de nuevo.',
+          isError: true,
+        });
       }
     } catch (error) {
       console.error('Error de red:', error);
-      alert('No se pudo conectar con el servidor.');
+      setDialogState({
+        open: true,
+        title: 'Error de Conexión',
+        description: 'No se pudo conectar con el servidor. Revisa tu conexión.',
+        isError: true,
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   }
-
+  
+  // Función para cerrar el pop-up
+  const closeDialog = () => {
+    setDialogState({ open: false, title: '', description: '', isError: false });
+  };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        {/* Campo de Rango de Fechas */}
-        <FormField
-          control={form.control}
-          name="dateRange"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Fechas de Estadía</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant={'outline'}
-                      className={cn(
-                        'w-full pl-3 text-left font-normal',
-                        !field.value?.from && 'text-muted-foreground'
-                      )}
-                    >
-                      {field.value?.from ? (
-                        field.value.to ? (
-                          <>
-                            {format(field.value.from, 'LLL dd, y')} -{' '}
-                            {format(field.value.to, 'LLL dd, y')}
-                          </>
+    // 7. ENVOLVEMOS TODO EN UN FRAGMENT (<>)
+    <>
+      {/* EL FORMULARIO (sin cambios en el JSX, excepto el estado 'disabled') */}
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          {/* ... (Campo de Rango de Fechas, sin cambios) ... */}
+          <FormField
+            control={form.control}
+            name="dateRange"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel>Fechas de Estadía</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant={'outline'}
+                        className={cn(
+                          'w-full pl-3 text-left font-normal',
+                          !field.value?.from && 'text-muted-foreground'
+                        )}
+                      >
+                        {field.value?.from ? (
+                          field.value.to ? (
+                            <>
+                              {format(field.value.from, 'LLL dd, y')} -{' '}
+                              {format(field.value.to, 'LLL dd, y')}
+                            </>
+                          ) : (
+                            format(field.value.from, 'LLL dd, y')
+                          )
                         ) : (
-                          format(field.value.from, 'LLL dd, y')
-                        )
-                      ) : (
-                        <span>Selecciona un rango de fechas</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    initialFocus
-                    mode="range"
-                    defaultMonth={field.value?.from}
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    numberOfMonths={1}
-                    disabled={{ before: new Date() }}
-                  />
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                          <span>Selecciona un rango de fechas</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      initialFocus
+                      mode="range"
+                      defaultMonth={field.value?.from}
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      numberOfMonths={1}
+                      disabled={[
+                      { before: new Date() }, // Regla 1: Deshabilitar fechas pasadas
+                      ...bookedDates          // Regla 2: Deshabilitar los rangos que fetcheamos
+                    ]}
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        {/* Campo de Número de Huéspedes */}
-        <FormField
-          control={form.control}
-          name="numberOfGuests"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Número de Huéspedes</FormLabel>
-              <FormControl>
-                <Input type="number" min="1" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          {/* ... (Campo de Número de Huéspedes, sin cambios) ... */}
+          <FormField
+            control={form.control}
+            name="numberOfGuests"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Número de Huéspedes</FormLabel>
+                <FormControl>
+                  <Input type="number" min="1" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <Button type="submit" className="w-full">
-          Reservar Ahora
-        </Button>
-      </form>
-    </Form>
+          <Button type="submit" disabled={isSubmitting} className="w-full">
+            {isSubmitting ? 'Procesando...' : 'Reservar Ahora'}
+          </Button>
+        </form>
+      </Form>
+
+      {/* 8. AÑADIMOS EL COMPONENTE DIALOG (POP-UP) */}
+      <Dialog open={dialogState.open} onOpenChange={closeDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle
+              className={dialogState.isError ? 'text-destructive' : 'text-primary'}
+            >
+              {dialogState.title}
+            </DialogTitle>
+            <DialogDescription>
+              {dialogState.description}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            {dialogState.isError ? (
+              <Button variant="outline" onClick={closeDialog}>
+                Cerrar
+              </Button>
+            ) : (
+              // ¡Tu botón para ir a la página principal!
+              <Button onClick={() => router.push('/home')}>
+                Volver al Inicio
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

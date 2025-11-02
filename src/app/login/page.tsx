@@ -84,9 +84,9 @@ export default function LoginPage() {
         if (nextPath) return router.replace(nextPath);
         
         if (data.role === 'ADMINISTRADOR') {
-          router.replace('/admin/dashboard');
+          router.replace('/home');
         } else if (data.role === 'OPERADOR') {
-          router.replace('/operator/dashboard');
+          router.replace('/home');
         } else {
           router.replace('/home'); 
         }

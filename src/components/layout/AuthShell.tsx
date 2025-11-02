@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/context/AuthContext';
 import { Header } from '@/components/layout/Header';
 import { Sidebar } from '@/components/layout/Sidebar';
 
@@ -18,17 +18,9 @@ export default function AuthShell({ children }: { children: React.ReactNode }) {
   if (loading || !session) return null; // (opcional) spinner
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header
-        onToggleSidebar={() => setOpen(v => !v)}
-        isSidebarOpen={open}
-        title="ERP Valenttine"
-        subtitle="Centro de Atención Médica Valenttine"
-      />
-      <div className="flex">
+    <div className="flex min-h-screen">
         <Sidebar open={open} onClose={() => setOpen(false)} />
         <main className="flex-1 p-6">{children}</main>
-      </div>
     </div>
   );
 }

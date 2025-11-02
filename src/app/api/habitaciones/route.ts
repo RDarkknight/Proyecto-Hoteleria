@@ -8,13 +8,10 @@ export async function GET() {
     // Consultamos la base de datos para obtener todas las habitaciones
     const habitaciones = await prisma.habitacion.findMany({
       include: {
-        servicios: { include: { servicio: true } },
-        // Añadimos la inclusión de las imágenes
-
-      },
-      orderBy: {
-        numero: 'asc',
-      },
+          servicios: { include: { servicio: true } },
+          imagenes: { take: 1 } // <-- CONFIRMAR ESTO
+        },
+        orderBy: { numero: 'asc' },
     });
 
     return NextResponse.json(habitaciones);
