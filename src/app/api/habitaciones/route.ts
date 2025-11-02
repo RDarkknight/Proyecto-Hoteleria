@@ -10,12 +10,7 @@ export async function GET() {
       include: {
         servicios: { include: { servicio: true } },
         // Añadimos la inclusión de las imágenes
-        imagenes: {
-          take: 1, // Solo queremos la primera imagen
-          orderBy: {
-            id: 'asc', // Ordenamos por ID para asegurar consistencia
-          },
-        },
+
       },
       orderBy: {
         numero: 'asc',
