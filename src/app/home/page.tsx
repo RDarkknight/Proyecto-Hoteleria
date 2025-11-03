@@ -22,7 +22,7 @@ const ServiceCard = ({ icon: Icon, title, description }) => (
 
 export default function HomePage() {
   return (
-    <div className="bg-gradient-to-b from-gray-900 to-black-600 text-white min-h-screen">
+    <div className="bg-gradient-to-b from-gray-500 to-black-600 text-white min-h-screen">
       {/* Sección Hero (sin cambios) */}
       <section 
         className="relative text-center py-20 md:py-32 px-4"
