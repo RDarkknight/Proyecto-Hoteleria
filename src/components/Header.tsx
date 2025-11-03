@@ -13,10 +13,16 @@ export function Header() {
   const user = session;
 
   return (
-    <header className="bg-black/40 sticky top-0 z-50 w-full border-b border-white/30 backdrop-blur-lg">
+    <header className="bg-black/40 sticky top-0 z-50 w-full border-b border-white/5 backdrop-blur-lg">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         {/* Logo o Nombre del Hotel */}
-        <Link href="/home" className="text-xl font-bold text-primary font-display">
+        <Link
+          href="/home"
+          className="text-xl font-extrabold  font-display tracking-tighter text-white"
+          style={{
+            textShadow: '0 0 10px #f9a8d4, 0 0 20px #f472b6, 0 0 30px #ec4899'
+          }}
+        >
           Colon Hotel
         </Link>
 

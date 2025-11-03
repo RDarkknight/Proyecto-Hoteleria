@@ -102,12 +102,26 @@ const getStateBadge = (estadoNombre: string) => {
     }
   };
 
-  const tableHeaders = ["Número", "Tipo", "Estado Actual", "Cambiar Estado", "Acciones"];
+  const tableHeaders = ["Número", "Tipo", "Piso", "Capacidad", "Estado Actual", "Cambiar Estado", "Acciones"];
 
-  const tableRows = habitaciones.map((habitacion) => [
-    <span key={`num-${habitacion.id}`} className="font-medium text-white">{habitacion.numero}</span>,
-    <span key={`tipo-${habitacion.id}`} className="text-gray-300">{habitacion.tipo}</span>,
-    getStateBadge(habitacion.estado.nombre),
+ const tableRows = habitaciones.map((habitacion) => [
+  // 1. Centramos "Número"
+  <span key={`num-${habitacion.id}`} className="block text-center font-medium text-white">{habitacion.numero}</span>,
+  
+  // "Tipo" lo dejamos a la izquierda a propósito
+  <span key={`tipo-${habitacion.id}`} className="text-gray-300">{habitacion.tipo}</span>,
+  
+  // "Piso" y "Capacidad" (ya estaban centrados)
+  <span key={`piso-${habitacion.id}`} className="block text-center text-gray-300">{habitacion.piso || 'N/A'}</span>,
+  <span key={`cap-${habitacion.id}`} className="block text-center text-gray-300">{habitacion.capacidad}</span>,
+  
+  // 2. Centramos "Estado Actual" (envolviéndolo en un div)
+  <div key={`badge-div-${habitacion.id}`} className="flex justify-center">
+    {getStateBadge(habitacion.estado.nombre)}
+  </div>,
+  
+  // 3. Centramos "Cambiar Estado" (envolviéndolo en un div)
+  <div key={`select-div-${habitacion.id}`} className="flex justify-center">
     <Select
       key={`select-${habitacion.id}`}
       value={selectedStates[habitacion.id]?.toString() || habitacion.estadoId.toString()}
@@ -123,17 +137,20 @@ const getStateBadge = (estadoNombre: string) => {
           </SelectItem>
         ))}
       </SelectContent>
-    </Select>,
-    <div key={`btn-div-${habitacion.id}`} className="text-right">
-      <Button
-        onClick={() => handleSaveChanges(habitacion.id)}
-        disabled={loading[habitacion.id] || !selectedStates[habitacion.id] || selectedStates[habitacion.id] === habitacion.estadoId}
-        size="sm"
-      >
-        {loading[habitacion.id] ? 'Guardando...' : 'Guardar'}
-      </Button>
-    </div>
-  ]);
+    </Select>
+  </div>,
+
+  // "Acciones" (ya estaba centrado)
+  <div key={`btn-div-${habitacion.id}`} className="flex justify-center">
+    <Button
+      onClick={() => handleSaveChanges(habitacion.id)}
+      disabled={loading[habitacion.id] || !selectedStates[habitacion.id] || selectedStates[habitacion.id] === habitacion.estadoId}
+      size="sm"
+    >
+      {loading[habitacion.id] ? 'Guardando...' : 'Guardar'}
+    </Button>
+  </div>
+]);
 
   return (
     <Card className="bg-black/50 backdrop-blur-sm border-white/20">

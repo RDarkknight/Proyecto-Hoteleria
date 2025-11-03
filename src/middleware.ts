@@ -12,6 +12,7 @@ const accessControlList: Record<string, RolUsuario[]> = {
   '/operator': [RolUsuario.OPERADOR, RolUsuario.ADMINISTRADOR],
   '/home': [RolUsuario.USUARIO, RolUsuario.OPERADOR, RolUsuario.ADMINISTRADOR],
   '/dashboard/gestion-habitaciones': [RolUsuario.OPERADOR],
+   '/dashboard/gestion-reservas': [RolUsuario.OPERADOR, RolUsuario.ADMINISTRADOR],
 };
 
 export async function middleware(request: NextRequest) {
@@ -78,6 +79,7 @@ export const config = {
     '/admin/:path*',
     '/operator/:path*',
     '/dashboard/gestion-habitaciones/:path*',
+    '/dashboard/gestion-reservas/:path*',
 
     // Futuras páginas de cliente que requieran login (ej: "Mis Reservas"):
     // '/mis-reservas/:path*',
