@@ -5,87 +5,122 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useMemo } from 'react';
 import { useAuth } from '@/context/AuthContext';
-type RoleKey = 'RECEPCIONISTA' | 'MEDICO' | 'GERENTE';
+import { RolUsuario } from '@prisma/client';
+import {
+  LayoutDashboard,
+  BedDouble,
+  CalendarCheck,
+  Users,
+  LogOut,
+  X,
+} from 'lucide-react';
+import clsx from 'clsx';
+import { Button } from '@/components/ui/button';
 
-const ACL: Record<string, RoleKey[]> = {
-  '/Pacientes':  ['RECEPCIONISTA', 'GERENTE'],
-  '/profesionales': ['RECEPCIONISTA', 'GERENTE'],
-  '/admin':      ['GERENTE'],
-  '/turnos': ["RECEPCIONISTA"],
-  //'/reception':  ['RECEPCIONISTA', 'GERENTE'], TODAVIA NO EXISTE
-  '/dashboard':  ['RECEPCIONISTA', 'MEDICO', 'GERENTE'],
-} as const;
+const NAV_LINKS = [
+  {
+    href: '/dashboard',
+    label: 'Dashboard',
+    icon: LayoutDashboard,
+    roles: [RolUsuario.ADMINISTRADOR, RolUsuario.OPERADOR],
+  },
+  {
+    href: '/dashboard/gestion-habitaciones',
+    label: 'Habitaciones',
+    icon: BedDouble,
+    roles: [RolUsuario.ADMINISTRADOR, RolUsuario.OPERADOR],
+  },
+  {
+    href: '/dashboard/gestion-reservas',
+    label: 'Reservas',
+    icon: CalendarCheck,
+    roles: [RolUsuario.ADMINISTRADOR, RolUsuario.OPERADOR],
+  },
+  {
+    href: '/dashboard/gestion-usuarios',
+    label: 'Usuarios',
+    icon: Users,
+    roles: [RolUsuario.ADMINISTRADOR],
+  },
+];
 
-const LABELS: Record<keyof typeof ACL, string> = {
-  '/Pacientes':  'Pacientes',
-  '/profesionales': 'Profesionales',
-  '/admin':      'Administración',
-  //'/reception':  'Recepción',
-  '/dashboard':  'Dashboard',
-  '/turnos': 'Turnos',
-} as const;
+type SidebarProps = {
+  open: boolean;
+  onClose: () => void;
+};
 
-const MENU_ORDER = ['/dashboard', '/turnos',/*'/reception',*/ '/Pacientes', '/profesionales', '/admin'] as const;
-
-function normalizeRole(input?: string | null): RoleKey | null {
-  if (!input) return null;
-  const up = input.normalize('NFD').replace(/\p{Diacritic}/gu, '').toUpperCase();
-  return (['RECEPCIONISTA','MEDICO','GERENTE'] as const).includes(up as RoleKey) ? (up as RoleKey) : null;
-}
-
-export function Sidebar() {
+export function Sidebar({ open, onClose }: SidebarProps) {
   const pathname = usePathname();
   const { session } = useAuth();
-  const role = normalizeRole(session?.role);
+  const userRole = session?.role;
 
-  const items = useMemo(() => {
-    if (!role) return [];
-    const bases = Object.keys(ACL) as Array<keyof typeof ACL>;
-    const sorted = bases.sort((a, b) => MENU_ORDER.indexOf(a as any) - MENU_ORDER.indexOf(b as any));
-    return sorted
-      .filter((base) => ACL[base].includes(role))
-      .map((base) => ({ href: base as string, label: LABELS[base] }));
-  }, [role]);
+  const filteredLinks = useMemo(() => {
+    if (!userRole) return [];
+    return NAV_LINKS.filter(link => link.roles.includes(userRole));
+  }, [userRole]);
 
-  if (!role) return null;
+  if (!userRole) return null;
 
   return (
-    <aside className="sticky top-16 h-[calc(100vh-4rem)] w-64 shrink-0 overflow-y-auto border-r bg-white/95 backdrop-blur-sm p-4">
+    <>
+      {/* Overlay for mobile */}
+      <div
+        className={clsx(
+          'fixed inset-0 z-30 bg-black/60 transition-opacity md:hidden',
+          {
+            'opacity-100 pointer-events-auto': open,
+            'opacity-0 pointer-events-none': !open,
+          }
+        )}
+        onClick={onClose}
+      />
 
-      <div className="p-2 h-full flex flex-col">
-        {/* Header */}
-        <div className="mb-4">
-          <h2 className="text-lg font-extrabold bg-gradient-to-r from-purple-600 to-purple-400 bg-clip-text text-transparent tracking-tight">
-            Módulos del Sistema
-          </h2>
-          <div className="mt-3 h-1 rounded-full bg-gradient-to-r from-purple-600 to-purple-400 opacity-90" />
+      <aside
+        className={clsx(
+          'fixed top-0 left-0 z-40 h-full w-64 bg-gray-900 text-white transition-transform duration-300 ease-in-out md:relative md:translate-x-0',
+          {
+            'translate-x-0': open,
+            '-translate-x-full': !open,
+          }
+        )}
+        aria-label="Sidebar"
+      >
+        <div className="flex h-full flex-col p-4">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-xl font-bold">Admin Panel</h2>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              className="text-white/80 hover:bg-white/10 hover:text-white md:hidden"
+            >
+              <X className="h-6 w-6" />
+            </Button>
+          </div>
+          <nav className="flex-1 space-y-2">
+            {filteredLinks.map(link => {
+              const isActive = pathname === link.href;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={onClose}
+                  className={clsx(
+                    'flex items-center gap-3 rounded-lg px-3 py-2 text-base font-medium transition-colors',
+                    {
+                      'bg-gray-800 text-white': isActive,
+                      'text-gray-400 hover:bg-gray-800 hover:text-white': !isActive,
+                    }
+                  )}
+                >
+                  <link.icon className="h-5 w-5" />
+                  <span>{link.label}</span>
+                </Link>
+              );
+            })}
+          </nav>
         </div>
-
-        {/* Navegación filtrada */}
-        <nav className="space-y-2">
-          {items.map((it) => {
-            const active = pathname.toLowerCase().startsWith(it.href.toLowerCase());
-            return (
-              <Link
-                key={it.href}
-                href={it.href}
-                aria-current={active ? 'page' : undefined}
-                className={[
-                  'block px-4 py-3 rounded-xl transition',
-                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500/60',
-                  active
-                    ? 'text-white shadow-sm bg-gradient-to-r from-purple-600 to-purple-400'
-                    : 'text-gray-700 hover:text-white hover:bg-gradient-to-r hover:from-purple-600 hover:to-purple-400'
-                ].join(' ')}
-              >
-                <span className="font-medium">{it.label}</span>
-              </Link>
-            );
-          })}
-        </nav>
-
-        <div className="mt-auto pt-6 text-xs text-gray-500">v1.0.0</div>
-      </div>
-    </aside>
+      </aside>
+    </>
   );
 }

@@ -1,16 +1,17 @@
-// src/components/layout/AuthShell.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { Header } from '@/components/Header'; // 1. Importar el Header correcto
-import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar'; // 2. Importar el Sidebar desde su nueva ruta
+import { Header } from '@/components/Header';
+import { Sidebar } from '@/components/layout/Sidebar';
+import { RolUsuario } from '@prisma/client';
 
 export default function AuthShell({ children }: { children: React.ReactNode }) {
   const { session, loading } = useAuth();
   const router = useRouter();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const pathname = usePathname();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (!loading && !session) {
@@ -19,27 +20,30 @@ export default function AuthShell({ children }: { children: React.ReactNode }) {
   }, [loading, session, router]);
 
   if (loading || !session) {
+    return null; // O un spinner/esqueleto de carga
+  }
+  
+  const isDashboardPage = pathname.startsWith('/dashboard');
+  const isManagementRole = session.role === RolUsuario.OPERADOR || session.role === RolUsuario.ADMINISTRADOR;
+
+  // Renderiza el layout del dashboard solo si es una página de gestión y el rol es el adecuado
+  if (isDashboardPage && isManagementRole) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
-        Cargando...
+      <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
+        <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        <div className="flex flex-1 flex-col overflow-hidden">
+          <Header onToggleSidebar={() => setSidebarOpen(v => !v)} />
+          <main className="flex-1 overflow-y-auto p-4 md:p-6">{children}</main>
+        </div>
       </div>
     );
   }
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-
+  // Renderiza el layout público para el resto de las páginas
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
-      {/* 3. Pasamos la función al Header principal */}
-      <Header onToggleSidebar={toggleSidebar} /> 
-      <div className="flex">
-        <DashboardSidebar isOpen={isSidebarOpen} />
-        <main className="flex-1 p-6 transition-all duration-300">
-          {children}
-        </main>
-      </div>
+    <div>
+      <Header />
+      <main>{children}</main>
     </div>
   );
 }
