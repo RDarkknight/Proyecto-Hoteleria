@@ -29,6 +29,16 @@ async function main() {
 
   // --- 2. CREACIÓN DE ENTIDADES INDEPENDIENTES ---
   
+  console.log('Creando métodos de pago...');
+await prisma.metodoDePago.createMany({
+  data: [
+    { nombre: 'Efectivo' },
+    { nombre: 'Tarjeta de Crédito' },
+    { nombre: 'Transferencia Bancaria' },
+  ],
+  skipDuplicates: true,
+});
+
   // --- A. CREAR ESTADOS DE HABITACIÓN (NUEVO) ---
   console.log('Creando estados de habitación...');
   // Guardamos los estados en variables para usar sus IDs más adelante

@@ -61,12 +61,34 @@ model Reserva {
 }
 
 model Pago {
-  id        Int     @id @default(autoincrement())
-  reservaId Int
-  monto     Float
-  metodo    String?
-  estado    String?
-  reserva   Reserva @relation(fields: [reservaId], references: [id])
+  id             Int       @id @default(autoincrement())
+  monto          Float
+  estado         EstadoPago @default(PENDIENTE) // Usamos el Enum
+  createdAt      DateTime  @default(now())
+
+  // Relación con Reserva (como ya tenías)
+  reservaId      Int
+  reserva        Reserva   @relation(fields: [reservaId], references: [id])
+
+  // Nueva relación con MetodoDePago
+  metodoId       Int
+  metodoDePago   MetodoDePago @relation(fields: [metodoId], references: [id])
+
+  @@index([reservaId])
+  @@index([metodoId])
+}
+
+enum EstadoPago {
+  PENDIENTE
+  COMPLETADO
+  FALLIDO
+  REEMBOLSADO
+}
+
+model MetodoDePago {
+  id     Int    @id @default(autoincrement())
+  nombre String @unique // Ej: "Tarjeta de Crédito", "Efectivo", "Transferencia"
+  pagos  Pago[]
 }
 
 model Servicio {

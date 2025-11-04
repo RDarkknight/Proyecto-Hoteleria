@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { Header } from '@/components/Header';
-import { Sidebar } from '@/components/layout/Sidebar';
+import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar';
 import { RolUsuario } from '@prisma/client';
 
 export default function AuthShell({ children }: { children: React.ReactNode }) {
@@ -30,7 +30,7 @@ export default function AuthShell({ children }: { children: React.ReactNode }) {
   if (isDashboardPage && isManagementRole) {
     return (
       <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
-        <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        <DashboardSidebar isOpen={sidebarOpen} />
         <div className="flex flex-1 flex-col overflow-hidden">
           <Header onToggleSidebar={() => setSidebarOpen(v => !v)} />
           <main className="flex-1 overflow-y-auto p-4 md:p-6">{children}</main>
