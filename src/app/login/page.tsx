@@ -7,6 +7,7 @@ import Image from 'next/image'
 import { type LoginResponse, LoginResponseSchema } from '@/lib/usuarios/types'
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext'
+import Link from 'next/link'
 
 export default function LoginPage() {
   const { login } = useAuth()
@@ -90,6 +91,7 @@ export default function LoginPage() {
         } else {
           router.replace('/home'); 
         }
+        router.refresh();
 
       }, 3000);
     } catch {
@@ -305,6 +307,14 @@ export default function LoginPage() {
                 </Button>
               </div>
             </form>
+            <div className="text-center mt-6">
+              <p className="text-sm text-gray-600">
+                ¿No tienes una cuenta?{' '}
+                <Link href="/registrar" className="font-medium text-primary hover:underline">
+                  Regístrate aquí
+                </Link>
+              </p>
+            </div>
           </div>
         </div>
       </div>

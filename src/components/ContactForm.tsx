@@ -107,9 +107,7 @@ export function ContactForm() {
   };
 
   return (
-    // Usamos un Fragment (<>) para devolver dos elementos hermanos: el Formulario y el Dialog
     <>
-      {/* --- EL FORMULARIO (sin cambios en el JSX) --- */}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <FormField
@@ -117,9 +115,15 @@ export function ContactForm() {
             name="nombre"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Nombre</FormLabel>
+                {/* CAMBIO: Hacemos la etiqueta blanca */}
+                <FormLabel className="text-white">Nombre</FormLabel>
                 <FormControl>
-                  <Input placeholder="Juan Perez" {...field} />
+                  {/* CAMBIO: Hacemos el input transparente/oscuro */}
+                  <Input 
+                    placeholder="Juan Perez" 
+                    {...field} 
+                    className="bg-black/30 border-white/20 text-white placeholder:text-gray-400"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -130,9 +134,15 @@ export function ContactForm() {
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                {/* CAMBIO: Hacemos la etiqueta blanca */}
+                <FormLabel className="text-white">Email de contacto</FormLabel>
                 <FormControl>
-                  <Input placeholder="juan@ejemplo.com" {...field} />
+                  {/* CAMBIO: Hacemos el input transparente/oscuro */}
+                  <Input 
+                    placeholder="juan@ejemplo.com" 
+                    {...field} 
+                    className="bg-black/30 border-white/20 text-white placeholder:text-gray-400"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -143,11 +153,13 @@ export function ContactForm() {
             name="mensaje"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Mensaje</FormLabel>
+                {/* CAMBIO: Hacemos la etiqueta blanca */}
+                <FormLabel className="text-white">Consulta</FormLabel>
                 <FormControl>
+                  {/* CAMBIO: Hacemos el textarea transparente/oscuro */}
                   <Textarea
                     placeholder="Escribe tu consulta aquí..."
-                    className="resize-none"
+                    className="resize-none bg-black/30 border-white/20 text-white placeholder:text-gray-400"
                     rows={5}
                     {...field}
                   />
@@ -162,7 +174,6 @@ export function ContactForm() {
         </form>
       </Form>
 
-      {/* --- NUEVO: EL POP-UP (DIALOG) --- */}
       <Dialog open={dialogState.open} onOpenChange={closeDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>

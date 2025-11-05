@@ -2,6 +2,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyJwt } from '@/lib/usuarios/auth';
+import {cookies} from 'next/headers';
+import { EstadoReserva } from '@prisma/client';
 
 // --- FUNCIÓN GET (para el dashboard de gestión) ---
 export async function GET() {
@@ -24,60 +26,66 @@ export async function GET() {
   }
 }
 
-// --- FUNCIÓN POST (para crear nuevas reservas desde el cliente) ---
+// En: src/app/api/reservas/route.ts
+
 export async function POST(request: Request) {
   try {
-    // 1. Verificar el token del usuario para obtener su ID
-    const token = request.headers.get('cookie')?.split('; ').find(c => c.startsWith('auth_token='))?.split('=')[1];
-    if (!token) {
-      return NextResponse.json({ error: 'No autorizado. Debes iniciar sesión para reservar.' }, { status: 401 });
-    }
-    const decodedToken = verifyJwt<{ id: number }>(token);
-    if (!decodedToken) {
-      return NextResponse.json({ error: 'Token inválido o expirado.' }, { status: 401 });
-    }
-    const usuarioId = decodedToken.id;
+    const token = cookies().get('auth_token')?.value;
 
-    // 2. Obtener y validar los datos del cuerpo de la solicitud
+    if (!token) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
+    const userPayload = verifyJwt<{ sub: string }>(token);
+    if (!userPayload) {
+      return NextResponse.json({ error: 'Token inválido' }, { status: 401 });
+    }
+    const userId = parseInt(userPayload.sub, 10);
+
     const body = await request.json();
     const { habitacionId, fechaInicio, fechaFin, numeroHuespedes } = body;
 
     if (!habitacionId || !fechaInicio || !fechaFin || !numeroHuespedes) {
-      return NextResponse.json({ error: 'Todos los campos son requeridos.' }, { status: 400 });
+      return NextResponse.json({ error: 'Faltan datos requeridos' }, { status: 400 });
     }
 
-    const inicio = new Date(fechaInicio);
-    const fin = new Date(fechaFin);
+    const startDate = new Date(fechaInicio);
+    const endDate = new Date(fechaFin);
 
-    // 3. Verificar si las fechas ya están ocupadas para esta habitación
-    const reservaExistente = await prisma.reserva.findFirst({
+    const existingReservation = await prisma.reserva.findFirst({
       where: {
         habitacionId: habitacionId,
-        fechaInicio: { lt: fin },
-        fechaFin: { gt: inicio },
-        estado: { in: ['Pendiente', 'Confirmada'] }
+        AND: [
+          { fechaInicio: { lt: endDate } },
+          { fechaFin: { gt: startDate } },
+        ],
       },
     });
 
-    if (reservaExistente) {
-      return NextResponse.json({ error: 'Las fechas seleccionadas ya no están disponibles para esta habitación.' }, { status: 409 });
+    if (existingReservation) {
+      return NextResponse.json(
+        { error: 'La habitación ya está reservada para las fechas seleccionadas.' },
+        { status: 409 }
+      );
     }
 
-    // 4. Crear la nueva reserva
     const nuevaReserva = await prisma.reserva.create({
       data: {
-        usuarioId: usuarioId,
+        usuarioId: userId,
         habitacionId: habitacionId,
-        fechaInicio: inicio,
-        fechaFin: fin,
+        fechaInicio: startDate,
+        fechaFin: endDate,
         numeroHuespedes: numeroHuespedes,
-        estado: 'Pendiente',
+        estado: EstadoReserva.PENDIENTE, // <-- 2. USA EL ENUM AQUÍ
       },
     });
 
     return NextResponse.json(nuevaReserva, { status: 201 });
   } catch (error) {
     console.error('Error al crear la reserva:', error);
-    return NextResponse.json({ error: 'No se pudo crear la reserva.' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'No se pudo procesar la reserva.' },
+      { status: 500 }
+    );
   }
 }

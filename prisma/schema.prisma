@@ -51,13 +51,22 @@ model Reserva {
   fechaInicio     DateTime
   fechaFin        DateTime
   numeroHuespedes Int      @default(1)
-  estado          String
+  
+  estado          EstadoReserva @default(PENDIENTE) 
+
   createdAt       DateTime @default(now())
   usuario         Usuario  @relation(fields: [usuarioId], references: [id])
   habitacion      Habitacion @relation(fields: [habitacionId], references: [id])
   pagos           Pago[]
   @@index([usuarioId])
   @@index([habitacionId])
+}
+
+enum EstadoReserva {
+  PENDIENTE
+  CONFIRMADA
+  CANCELADA
+  COMPLETADA
 }
 
 model Pago {
@@ -83,6 +92,7 @@ enum EstadoPago {
   COMPLETADO
   FALLIDO
   REEMBOLSADO
+  RECHAZADO
 }
 
 model MetodoDePago {

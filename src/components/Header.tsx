@@ -1,56 +1,37 @@
-// src/components/Header.tsx
-'use client';
+// En: src/components/Header.tsx
 
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { cookies } from 'next/headers'; // <-- De vuelta a Componente de Servidor
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useAuth } from '@/context/AuthContext';
-import { Menu, LogOut } from 'lucide-react';
+import { verifyJwt } from '@/lib/usuarios/auth';
+import type { JwtUser } from '@/lib/usuarios/types';
 import { RolUsuario } from '@prisma/client';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-import { useState } from 'react';
+import { DashboardSidebar } from './dashboard/DashboardSidebar';
+import { LogoutButton } from './LogoutButton'; // <-- Usamos el nuevo componente
 
-export function Header({ onToggleSidebar }: { onToggleSidebar?: () => void }) {
-  const { session, logout } = useAuth();
-  const user = session;
-  const pathname = usePathname();
-  const router = useRouter();
-  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+export async function Header() {
+  const token = cookies().get('auth_token')?.value;
+  let user: JwtUser | null = null;
 
-  const isDashboardPage = pathname.startsWith('/dashboard');
+  if (token) {
+    user = verifyJwt<JwtUser>(token);
+  }
+
+  // Lógica de roles que ya tenías
   const isManagementRole = user?.role === RolUsuario.OPERADOR || user?.role === RolUsuario.ADMINISTRADOR;
 
-  const handleLogout = async () => {
-    await logout();
-    router.push('/login');
-    setShowLogoutConfirm(false);
-  };
-
   return (
-    <header className="bg-black/40 sticky top-0 z-50 w-full border-b border-white/5 backdrop-blur-lg">
+    <header className="bg-black/20 sticky top-0 z-50 w-full border-b border-white/10 backdrop-blur-lg">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
+        
         <div className="flex items-center gap-3">
-          {isDashboardPage && isManagementRole && onToggleSidebar && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onToggleSidebar}
-              className="text-white/80 hover:bg-white/10 hover:text-white md:hidden"
-            >
-              <Menu className="h-6 w-6" />
-            </Button>
+          {/* Lógica condicional del sidebar (como la tenías) */}
+          {isManagementRole && (
+            <DashboardSidebar />
           )}
+          
+          {/* Tu logo de neón (como lo tenías) */}
           <Link
             href="/home"
             className="text-xl font-extrabold font-display tracking-tighter text-white"
@@ -60,6 +41,7 @@ export function Header({ onToggleSidebar }: { onToggleSidebar?: () => void }) {
           </Link>
         </div>
 
+        {/* Navegación (como la teníamos) */}
         <nav className="hidden items-center space-x-6 text-sm font-medium md:flex">
           <Link href="/home" className="text-base font-medium text-white/80 transition-colors hover:text-white">Inicio</Link>
           <Link href="/habitaciones" className="text-base font-medium text-white/80 transition-colors hover:text-white">Habitaciones</Link>
@@ -67,6 +49,7 @@ export function Header({ onToggleSidebar }: { onToggleSidebar?: () => void }) {
           <Link href="/contacto" className="text-base font-medium text-white/80 transition-colors hover:text-white">Contacto</Link>
         </nav>
 
+        {/* Lógica de Sesión (actualizada) */}
         <div className="flex items-center space-x-4">
           {user ? (
             <>
@@ -74,27 +57,8 @@ export function Header({ onToggleSidebar }: { onToggleSidebar?: () => void }) {
                 <span className="text-sm font-medium text-white">Hola, {user.nombre}</span>
                 <Badge variant="secondary">{user.role}</Badge>
               </div>
-              <AlertDialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
-                <AlertDialogTrigger asChild>
-                  <Button variant="ghost" size="icon" className="text-white/80 hover:bg-red-500/20 hover:text-red-400">
-                    <LogOut className="h-5 w-5" />
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Esta acción cerrará tu sesión actual.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleLogout} className="bg-red-600 hover:bg-red-700">
-                      Cerrar Sesión
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+              {/* Usamos el nuevo botón de cliente con el pop-up */}
+              <LogoutButton />
             </>
           ) : (
             <Button asChild>

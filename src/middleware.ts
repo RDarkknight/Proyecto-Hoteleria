@@ -8,11 +8,13 @@ import { runtime } from './app/api/profesionales/route';
 
 // 1. Definimos las rutas y los roles que pueden acceder a ellas
 const accessControlList: Record<string, RolUsuario[]> = {
-  '/admin': [RolUsuario.ADMINISTRADOR],
-  '/operator': [RolUsuario.OPERADOR, RolUsuario.ADMINISTRADOR],
   '/home': [RolUsuario.USUARIO, RolUsuario.OPERADOR, RolUsuario.ADMINISTRADOR],
-  '/dashboard/gestion-habitaciones': [RolUsuario.OPERADOR],
-   '/dashboard/gestion-reservas': [RolUsuario.OPERADOR, RolUsuario.ADMINISTRADOR],
+  '/dashboard/gestion-habitaciones': [RolUsuario.OPERADOR,RolUsuario.ADMINISTRADOR],
+  '/dashboard/gestion-reservas': [RolUsuario.OPERADOR, RolUsuario.ADMINISTRADOR],
+  '/dashboard/mapa-habitaciones': [RolUsuario.OPERADOR, RolUsuario.ADMINISTRADOR],
+  '/dashboard/consultas': [RolUsuario.OPERADOR, RolUsuario.ADMINISTRADOR],
+  '/dashboard/pagos': [RolUsuario.OPERADOR, RolUsuario.ADMINISTRADOR],
+  '/dashboard/metricas': [RolUsuario.ADMINISTRADOR],
 };
 
 export async function middleware(request: NextRequest) {
@@ -80,6 +82,10 @@ export const config = {
     '/operator/:path*',
     '/dashboard/gestion-habitaciones/:path*',
     '/dashboard/gestion-reservas/:path*',
+    '/dashboard/metricas/:path*',
+    '/dashboard/mapa-habitaciones/:path*',
+    '/dashboard/consultas/:path*',
+    '/dashboard/pagos/:path*',
 
     // Futuras páginas de cliente que requieran login (ej: "Mis Reservas"):
     // '/mis-reservas/:path*',
