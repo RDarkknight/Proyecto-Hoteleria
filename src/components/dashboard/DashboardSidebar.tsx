@@ -11,14 +11,12 @@ import {
   SheetClose,
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-// CAMBIO: Importamos 'useAuth', 'RolUsuario' y el icono de 'BarChart'
-import { Menu, LayoutDashboard, CreditCard, BedDouble, Mail, Map, BarChart } from 'lucide-react';
+import { Menu, LayoutDashboard, CreditCard, BedDouble, Mail, Map, BarChart, Users } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { RolUsuario } from '@prisma/client';
 
 export function DashboardSidebar() {
-  // CAMBIO: Obtenemos la sesión del usuario
   const { session } = useAuth();
   const user = session;
 
@@ -83,7 +81,7 @@ export function DashboardSidebar() {
             </Link>
           </SheetClose>
 
-          {/* --- NUEVO BLOQUE CONDICIONAL PARA ADMIN --- */}
+          
           {user?.role === RolUsuario.ADMINISTRADOR && (
             <>
               <div className="my-3 border-t border-white/10"></div>
@@ -93,7 +91,12 @@ export function DashboardSidebar() {
                   Métricas (Admin)
                 </Link>
               </SheetClose>
-              {/* Aquí irían los CRUD de Habitaciones y Operadores */}
+              <SheetClose asChild>
+                <Link href="/dashboard/admin/operadores" className="flex items-center gap-3 rounded-lg px-3 py-2 text-primary/80 transition-all hover:text-primary">
+                  <Users className="h-4 w-4" />
+                  Gestión de Operadores
+                </Link>
+              </SheetClose>
             </>
           )}
           {/* --- FIN DEL BLOQUE --- */}

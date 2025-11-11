@@ -15,6 +15,8 @@ const accessControlList: Record<string, RolUsuario[]> = {
   '/dashboard/consultas': [RolUsuario.OPERADOR, RolUsuario.ADMINISTRADOR],
   '/dashboard/pagos': [RolUsuario.OPERADOR, RolUsuario.ADMINISTRADOR],
   '/dashboard/metricas': [RolUsuario.ADMINISTRADOR],
+  '/dashboard/admin': [RolUsuario.ADMINISTRADOR],
+  '/dashboard/admin/operadores': [RolUsuario.ADMINISTRADOR],
 };
 
 export async function middleware(request: NextRequest) {
@@ -73,7 +75,7 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
 /*
-    * Lista de todas las rutas que quieres PROTEGER.
+    * Lista de todas las rutas que se deben PROTEGER.
     * Cualquier ruta que NO esté aquí, será PÚBLICA.
     */
 
@@ -86,9 +88,8 @@ export const config = {
     '/dashboard/mapa-habitaciones/:path*',
     '/dashboard/consultas/:path*',
     '/dashboard/pagos/:path*',
-
-    // Futuras páginas de cliente que requieran login (ej: "Mis Reservas"):
-    // '/mis-reservas/:path*',
+    '/dashboard/admin/:path*',
+    '/dashboard/admin/operadores/:path*',
 
     // Incluimos /login para poder redirigir a los usuarios que ya están logueados
     '/login',
